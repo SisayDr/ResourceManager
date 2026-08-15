@@ -9,9 +9,9 @@
 
 ## 2. Database & Models
 
-- [ ] Set up Entity Framework Core
-- [ ] Configure `DbContext`
-- [ ] Create `Group` model
+- [x] Install Entity Framework SqlServer & Tools
+- [x] Configure `DbContext`
+- [x] Create `Group` model
 - [ ] Create `User` model
 - [ ] Create `ResourceType` model
 - [ ] Create `Resource` model
