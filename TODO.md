@@ -12,13 +12,13 @@
 - [x] Install Entity Framework SqlServer & Tools
 - [x] Configure `DbContext`
 - [x] Create `Group` model
-- [ ] Create `User` model
-- [ ] Create `ResourceType` model
-- [ ] Create `Resource` model
-- [ ] Create `Reservation` model
-- [ ] Define model relationships
-- [ ] Define required fields and validation
-- [ ] Add migrations and update database
+- [x] Create `User` model
+- [x] Create `ResourceType` model
+- [x] Create `Resource` model
+- [x] Create `Reservation` model
+- [x] Define model relationships
+- [x] Define required fields and validation
+- [x] Add migrations and update database
 - [ ] Seed initial data
 
 ## 3. Group Management

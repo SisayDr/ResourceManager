@@ -2,12 +2,11 @@
 
 namespace ResourceManagerAPI.Models
 {
-    public class Group : BaseAuditableEntity
+    public class ResourceType : BaseAuditableEntity
     {
-        [MaxLength(255)]
+        [MaxLength (100)]
         public required string Name { get; set; }
 
-        public ICollection<User> Users { get; set; } = [];
         public ICollection<Resource> Resources { get; set; } = [];
     }
 }
