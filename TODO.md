@@ -29,12 +29,10 @@
 
 ## 4. User Management
 
-- [ ] Implement User Controller CRUD [0/5]
-- [ ] Implement User routes
-- [ ] Add request/response DTOs
-- [ ] Add user validation
-- [ ] Test User CRUD
-- [ ] Handle duplicate users
+- [x] Implement User Controller CRUD [5/5]
+- [x] Implement User routes
+- [x] Add request/response DTOs
+- [x] Test User CRUD
 
 ## 5. Resource Types
 
@@ -69,7 +67,7 @@
 
 ## 9. Authentication & Authorization
 
-- [ ] Implement login/logout endpoint
+- [x] Implement login/logout endpoint
 - [ ] Implement user authentication
 - [ ] Add authentication middleware
 - [ ] Add authorization policies/roles

@@ -1,11 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using ResourceManagerAPI.Models;
 
 namespace ResourceManagerAPI.Data{
-    public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options){
+    public class AppDbContext(DbContextOptions<AppDbContext> options) : IdentityDbContext<User> (options){
         public DbSet<Group> Groups { get; set; }
         public DbSet<ResourceType> ResourceTypes { get; set; }
-        public DbSet<User> Users { get; set; }
         public DbSet<Resource> Resources { get; set; }
         public DbSet<Reservation> Reservations { get; set; }
 
