@@ -6,7 +6,7 @@ using ResourceManagerAPI.Models;
 
 namespace ResourceManagerAPI.Services
 {
-    public class UserService (AppDbContext db, UserManager<User> userManager, SignInManager<User> signInManager)
+    public class UserService (AppDbContext db, UserManager<User> userManager, SignInManager<User> signInManager, IHttpContextAccessor httpContextAccessor)
     {
         public async Task<List<UserResponse>> GetAllUsers()
         {
@@ -27,7 +27,7 @@ namespace ResourceManagerAPI.Services
             if (user is null) return null;
             return await ToUserResponse(user);
         }
-        public async Task<IdentityResult> CreateUser(CreateUserRequest request)
+        public async Task<IdentityResult> CreateUser(UserRequest request)
         {
             var newUser = new User { UserName = request.Email, Email = request.Email, FullName = request.FullName};
 
@@ -37,15 +37,38 @@ namespace ResourceManagerAPI.Services
             return await userManager.AddToRoleAsync(newUser, request.Role);
         }
 
-        public async Task<User?> UpdateUser(string  id, User updatedUser)
+        public async Task<IdentityResult?> UpdateUser(string  id, UserUpdateRequest updatedUser)
         {
-            var user = await db.Users.FirstOrDefaultAsync(u => u.Id == id);
-            if (user == null) {return null;}
+            var currentUser = await GetCurrentUser();
+            var user = await userManager.FindByIdAsync(id);
+            if (user == null || currentUser == null) {return null;}
+
+            bool isAdmin = currentUser.Role == "Admin";
+            bool isOwnUser = currentUser.Id == id;
+            if (!isAdmin && !isOwnUser) return null;
 
             user.FullName = updatedUser.FullName;
             user.Email = updatedUser.Email;
+            user.UserName = updatedUser.Email;
 
-            return user;
+            var result = await userManager.UpdateAsync(user);
+            if(!result.Succeeded || !isAdmin) { return result; }
+
+            if(updatedUser.Password is not null)
+            {
+                var token = await userManager.GeneratePasswordResetTokenAsync(user);
+                result = await userManager.ResetPasswordAsync(user, token, updatedUser.Password);
+            }
+            if (updatedUser.Role is not null)
+            {
+                var currentRole = (await userManager.GetRolesAsync(user)).FirstOrDefault();
+                if (currentRole is not null && currentRole != updatedUser.Role)
+                {
+                    await userManager.RemoveFromRoleAsync(user, currentRole);
+                    result = await userManager.AddToRoleAsync(user, updatedUser.Role);
+                }
+            }
+            return result;
         }
 
         public async Task<bool> DeleteUser(string id) {
@@ -62,6 +85,13 @@ namespace ResourceManagerAPI.Services
             return await signInManager.PasswordSignInAsync(email, password, isPersistent: false, lockoutOnFailure: true);
         }
         public async Task Logout() { await signInManager.SignOutAsync(); }
+
+        public async Task<UserResponse?> GetCurrentUser()
+        {
+            var user = await userManager.GetUserAsync(httpContextAccessor.HttpContext!.User);
+            if (user is null) return null;
+            return await ToUserResponse(user);
+        }
 
         private async Task<UserResponse> ToUserResponse(User user)
         {

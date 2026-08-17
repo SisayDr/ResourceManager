@@ -1,7 +1,5 @@
 ﻿using ResourceManagerAPI.DTOs;
 using ResourceManagerAPI.Services;
-using System.Runtime.CompilerServices;
-using System.Security.Claims;
 
 namespace ResourceManagerAPI.Routes
 {
@@ -9,13 +7,16 @@ namespace ResourceManagerAPI.Routes
     {
         public static void MapUserRoutes(this WebApplication app)
         {
-            var users = app.MapGroup("/api/users");
+            app.MapPost("/api/login", Login);
+            var users = app.MapGroup("/api/users").RequireAuthorization();
 
             users.MapGet("/", GetUsers);
-            users.MapPost("/", CreateUser);
-            users.MapDelete("/{id}", DeleteUser);
-            users.MapPost("/login", Login);
-            users.MapPost("/logout", Logout).RequireAuthorization();
+            users.MapGet("/{id}", GetUserById);
+            users.MapPut("/{id}", UpdateUser);
+            users.MapGet("/me", GetCurrentUser);
+            users.MapPost("/", CreateUser).RequireAuthorization("AdminOnly");
+            users.MapDelete("/{id}", DeleteUser).RequireAuthorization("AdminOnly");
+            users.MapPost("/logout", Logout);
         }
 
         private static async Task<IResult> GetUsers(UserService service)
@@ -24,7 +25,18 @@ namespace ResourceManagerAPI.Routes
 
             return Results.Ok(users);
         }
-        private static async Task<IResult> CreateUser(CreateUserRequest request, UserService service)
+        private static async Task<IResult> GetUserById(string id, UserService service)
+        {
+            var user = await service.GetUserById(id);
+
+            return Results.Ok(user);
+        }
+        private static async Task<IResult> GetCurrentUser(UserService service)
+        {
+            var currentUser = await service.GetCurrentUser();
+            return Results.Ok(currentUser);
+        }
+        private static async Task<IResult> CreateUser(UserRequest request, UserService service)
         {
             var result = await service.CreateUser(request);
 
@@ -32,6 +44,13 @@ namespace ResourceManagerAPI.Routes
 
             return Results.Created();
         }
+        private static async Task<IResult> UpdateUser(string id, UserUpdateRequest request, UserService service)
+        {
+            var result = await service.UpdateUser(id, request);
+            return result is not null ? Results.Ok(result) : Results.BadRequest();
+
+        }
+      
         private static async Task<IResult> DeleteUser(string id, UserService service) { 
             var deleted = await service.DeleteUser(id);
 

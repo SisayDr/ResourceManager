@@ -2,9 +2,9 @@
 {
     public static class RouteHandler
     {
-        public static void MapRoutes(this WebApplication app)
-        {
+        public static void MapRoutes(this WebApplication app){
             app.MapUserRoutes();
+            app.MapGroupRoutes();
 
         }
     }

@@ -23,20 +23,20 @@
 
 ## 3. Group Management
 
-- [ ] Implement Group Controller CRUD
-- [ ] Implement Group routes
-- [ ] Test Group CRUD
+- [x] Implement Group Service CRUD [4/5]
+- [x] Implement Group routes
+- [x] Test Group CRUD
 
 ## 4. User Management
 
-- [x] Implement User Controller CRUD [5/5]
+- [x] Implement User Service CRUD [5/5]
 - [x] Implement User routes
 - [x] Add request/response DTOs
 - [x] Test User CRUD
 
 ## 5. Resource Types
 
-- [ ] Implement ResourceType Controller CRUD [0/5]
+- [ ] Implement ResourceType Service CRUD [0/5]
 - [ ] Implement ResourceType routes
 - [ ] Add resource type validation
 - [ ] Prevent deletion when resources depend on a resource type
@@ -44,7 +44,7 @@
 
 ## 6. Resources
 
-- [ ] Implement Resource Controller CRUD [0/5]
+- [ ] Implement Resource Service CRUD [0/5]
 - [ ] Implement Resource routes
 - [ ] Add resource validation
 - [ ] Add resource open hours
@@ -53,7 +53,7 @@
 
 ## 7. Reservations
 
-- [ ] Implement Reservation Controller CRUD [0/5]
+- [ ] Implement Reservation Service CRUD [0/5]
 - [ ] Implement Reservation routes
 - [ ] Prevent reservations in the past
 - [ ] Prevent overlapping reservations
@@ -68,10 +68,10 @@
 ## 9. Authentication & Authorization
 
 - [x] Implement login/logout endpoint
-- [ ] Implement user authentication
-- [ ] Add authentication middleware
-- [ ] Add authorization policies/roles
-- [ ] Test unauthorized requests
-- [ ] Test forbidden requests
+- [x] Implement user authentication
+- [x] Add authentication middleware
+- [x] Add authorization policies/roles
+- [x] Test unauthorized requests
+- [x] Test forbidden requests
 
 ## 10. Frontend
