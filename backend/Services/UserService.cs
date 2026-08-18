@@ -2,11 +2,12 @@
 using Microsoft.EntityFrameworkCore;
 using ResourceManagerAPI.Data;
 using ResourceManagerAPI.DTOs;
+using ResourceManagerAPI.Extensions;
 using ResourceManagerAPI.Models;
 
 namespace ResourceManagerAPI.Services
 {
-    public class UserService (AppDbContext db, UserManager<User> userManager, SignInManager<User> signInManager, IHttpContextAccessor httpContextAccessor)
+    public class UserService (AppDbContext db, UserManager<User> userManager, SignInManager<User> signInManager, UserAccessor userAccessor)
     {
         public async Task<List<UserResponse>> GetAllUsers()
         {
@@ -14,7 +15,7 @@ namespace ResourceManagerAPI.Services
             var result = new List<UserResponse>();
 
             foreach (var user in users) { 
-                result.Add(await ToUserResponse(user));
+                result.Add(await user.ToUserResponseAsync(userManager));
             }
 
             return result;
@@ -25,7 +26,7 @@ namespace ResourceManagerAPI.Services
             var user = await db.Users.FirstOrDefaultAsync(u => u.Id == id);
 
             if (user is null) return null;
-            return await ToUserResponse(user);
+            return await user.ToUserResponseAsync(userManager);
         }
         public async Task<IdentityResult> CreateUser(UserRequest request)
         {
@@ -39,7 +40,7 @@ namespace ResourceManagerAPI.Services
 
         public async Task<IdentityResult?> UpdateUser(string  id, UserUpdateRequest updatedUser)
         {
-            var currentUser = await GetCurrentUser();
+            var currentUser = await userAccessor.GetCurrentUserAsync();
             var user = await userManager.FindByIdAsync(id);
             if (user == null || currentUser == null) {return null;}
 
@@ -86,18 +87,6 @@ namespace ResourceManagerAPI.Services
         }
         public async Task Logout() { await signInManager.SignOutAsync(); }
 
-        public async Task<UserResponse?> GetCurrentUser()
-        {
-            var user = await userManager.GetUserAsync(httpContextAccessor.HttpContext!.User);
-            if (user is null) return null;
-            return await ToUserResponse(user);
-        }
-
-        private async Task<UserResponse> ToUserResponse(User user)
-        {
-            var roles = await userManager.GetRolesAsync(user);
-            return new UserResponse(user.Id, user.FullName, user.Email!, roles.FirstOrDefault());
-        }
-
+        public async Task<UserResponse?> GetCurrentUser(){return await userAccessor.GetCurrentUserAsync();}
     }
 }

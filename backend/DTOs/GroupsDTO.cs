@@ -1,3 +1,3 @@
 ﻿namespace ResourceManagerAPI.DTOs;
 
-public record GroupDTO(string Name);
+public record GroupDto(string Name);

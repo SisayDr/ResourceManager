@@ -12,6 +12,8 @@
         {
             CreatedAt = DateTimeOffset.UtcNow;
             CreatedBy = UserId;
+            LastModifiedAt = DateTimeOffset.UtcNow;
+            LastModifiedBy = UserId;
         }
         public void SetModified(string? UserId)
         {

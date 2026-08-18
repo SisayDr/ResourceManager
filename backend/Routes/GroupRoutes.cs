@@ -2,6 +2,7 @@
 using ResourceManagerAPI.DTOs;
 using ResourceManagerAPI.Models;
 using ResourceManagerAPI.Services;
+using static ResourceManagerAPI.Services.GroupService;
 
 namespace ResourceManagerAPI.Routes
 {
@@ -13,6 +14,7 @@ namespace ResourceManagerAPI.Routes
             var groups = app.MapGroup("/api/groups").RequireAuthorization("AdminOnly");
 
             //groups.MapGet("/", GetAllGroups);
+            groups.MapGet("/{id}", GetGroupById);
             groups.MapPost("/", CreateGroup);
             groups.MapPut("/{id}", UpdateGroup);
             groups.MapDelete("/{id}", DeleteGroup);
@@ -22,14 +24,19 @@ namespace ResourceManagerAPI.Routes
         {
             return Results.Ok(await service.GetAllGroups());
         }
-        public static async Task<IResult> CreateGroup(GroupDTO newGroupName, GroupService service)
+        public static async Task<IResult> GetGroupById(Guid id, GroupService service)
         {
-            var result = await service.CreateGroup(newGroupName);
-            return Results.Ok(result);
+            var group = await service.GetGroupById(id);
+            return group is not null ? Results.Ok(group) : Results.NotFound();
         }
-        public static async Task<IResult> UpdateGroup(Guid id, GroupDTO UpdatedGroupName, GroupService service)
+        public static async Task<IResult> CreateGroup(GroupDto newGroup, GroupService service)
         {
-            var result = await service.UpdateGroup(id, UpdatedGroupName);
+            var result = await service.CreateGroup(newGroup);
+            return result is not null ? Results.Ok(result) : Results.Conflict(new {message = "Group already exits."});
+        }
+        public static async Task<IResult> UpdateGroup(Guid id, GroupDto UpdatedGroup, GroupService service)
+        {
+            var result = await service.UpdateGroup(id, UpdatedGroup);
 
             return Results.Ok(result);
         }
@@ -37,7 +44,13 @@ namespace ResourceManagerAPI.Routes
         {
             var result = await service.DeleteGroup(id);
 
-            return Results.Ok(result);
+            return result switch
+            {
+                DbOperationResult.Deleted => Results.NoContent(),
+                DbOperationResult.NotFound => Results.NotFound(),
+                DbOperationResult.InUse => Results.Conflict(),
+                _ => Results.Problem()
+            };
         }
     }
 }

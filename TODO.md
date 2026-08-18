@@ -23,7 +23,7 @@
 
 ## 3. Group Management
 
-- [x] Implement Group Service CRUD [4/5]
+- [x] Implement Group Service CRUD [5/5]
 - [x] Implement Group routes
 - [x] Test Group CRUD
 
@@ -36,20 +36,20 @@
 
 ## 5. Resource Types
 
-- [ ] Implement ResourceType Service CRUD [0/5]
-- [ ] Implement ResourceType routes
-- [ ] Add resource type validation
-- [ ] Prevent deletion when resources depend on a resource type
-- [ ] Test ResourceType CRUD
+- [x] Implement ResourceType Service CRUD [5/5]
+- [x] Implement ResourceType routes
+- [x] Add resource type validation
+- [x] Prevent deletion when resources depend on a resource type
+- [x] Test ResourceType CRUD
 
 ## 6. Resources
 
-- [ ] Implement Resource Service CRUD [0/5]
-- [ ] Implement Resource routes
+- [x] Implement Resource Service CRUD [0/5]
+- [x] Implement Resource routes
 - [ ] Add resource validation
 - [ ] Add resource open hours
-- [ ] Test Resource CRUD
-- [ ] Prevent deletion when active reservations exist
+- [x] Test Resource CRUD
+- [x] Prevent deletion when active reservations exist
 
 ## 7. Reservations
 
