@@ -2,7 +2,6 @@
 
 namespace ResourceManagerAPI.Models
 {
-    public enum ReservationMode { shared, exclusive }
     public class Resource : BaseAuditableEntity
     {
         [MaxLength(255)]

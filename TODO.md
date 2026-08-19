@@ -44,21 +44,21 @@
 
 ## 6. Resources
 
-- [x] Implement Resource Service CRUD [0/5]
+- [x] Implement Resource Service CRUD [5/5]
 - [x] Implement Resource routes
-- [ ] Add resource validation
+- [x] Add resource validation
 - [ ] Add resource open hours
 - [x] Test Resource CRUD
 - [x] Prevent deletion when active reservations exist
 
 ## 7. Reservations
 
-- [ ] Implement Reservation Service CRUD [0/5]
-- [ ] Implement Reservation routes
-- [ ] Prevent reservations in the past
-- [ ] Prevent overlapping reservations
+- [x] Implement Reservation Service CRUD [5/5]
+- [x] Implement Reservation routes
+- [x] Prevent reservations in the past
+- [x] Prevent overlapping reservations
 - [ ] Prevent reservations outside resource open hours
-- [ ] Test Reservation CRUD
+- [x] Test Reservation CRUD
 
 ## 8. Search / Availability
 

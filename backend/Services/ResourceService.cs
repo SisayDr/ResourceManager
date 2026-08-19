@@ -1,49 +1,54 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using ResourceManagerAPI.Data;
 using ResourceManagerAPI.DTOs;
+using ResourceManagerAPI.Extensions;
 using ResourceManagerAPI.Models;
 
 namespace ResourceManagerAPI.Services
 {
-    public class ResourceService(AppDbContext db)
+    public class ResourceService(AppDbContext db, CurrentUserService currentUser)
     {
         public async Task<List<Resource>> GetAllResources()
         {
-            var resources = await db.Resources.ToListAsync();
-            return resources;
+            var currentUserProfile = await currentUser.GetProfileAsync();
+            if (currentUserProfile.Role == "Admin") return await db.Resources.ToListAsync();
+            return await db.Resources.Where(r => r.GroupId == currentUserProfile.GroupId).ToListAsync();
         }
 
         public async Task<Resource?> GetResourcebyId(Guid id)
         {
             var resource = await db.Resources.FindAsync(id);
-            return resource;
+            if(resource is null) return null;
+
+            return (await currentUser.CanAccessGroupAsync(resource.GroupId)) ? resource : null;
         }
 
-        public async Task<Resource> CreateResource(ResourceDto newResource)
+        public async Task<ResourceResponse?> CreateResource(ResourceRequest request)
         {
-            var resource = new Resource{
-                Name = newResource.Name,
-                TotalCapacity = newResource.TotalCapacity,
-                ReservationMode = (Models.ReservationMode) newResource.ReservationMode,
-                ResourceTypeId = newResource.ResourceTypeId,
-                GroupId = newResource.GroupId
-            };
-            await db.Resources.AddAsync(resource);
+            Resource newResource = request.ToResource();
+
+            if (!await currentUser.CanAccessGroupAsync(request.GroupId)) return null;
+
+            await db.Resources.AddAsync(newResource);
             await db.SaveChangesAsync();
 
-            return resource;
+            return newResource.ToResourceResponse();
         }
 
-        public async Task<Resource?> UpdateResource(Guid id, ResourceDto updatedResource)
+        public async Task<Resource?> UpdateResource(Guid id, ResourceRequest updatedResource)
         {
+            var isAdmin = await currentUser.IsAdminAsync();
             var resource = await db.Resources.FindAsync(id);
+
             if (resource is null) return null;
+            if(!await currentUser.CanAccessGroupAsync(resource.GroupId)) return null;
 
             resource.Name = updatedResource.Name;
             resource.TotalCapacity = updatedResource.TotalCapacity;
-            resource.ReservationMode = (Models.ReservationMode) updatedResource.ReservationMode;
+            resource.ReservationMode = (ReservationMode) updatedResource.ReservationMode;
             resource.ResourceTypeId = updatedResource.ResourceTypeId;
-            resource.GroupId = updatedResource.GroupId;
+            
+            if(isAdmin) resource.GroupId = updatedResource.GroupId;
 
             await db.SaveChangesAsync();
             return resource;
@@ -51,8 +56,11 @@ namespace ResourceManagerAPI.Services
 
         public async Task<DbOperationResult> DeleteResource(Guid id)
         {
+            var currentUserProfile = await currentUser.GetProfileAsync();
             var resource = await db.Resources.FindAsync(id);
             if (resource is null) return DbOperationResult.NotFound;
+
+            if (!await currentUser.CanAccessGroupAsync(resource.GroupId)) return DbOperationResult.UnAuthorized;
 
             var isInUse = await db.Reservations.AnyAsync(r => r.ResourceId == id);
             if (isInUse) return DbOperationResult.InUse;
@@ -62,6 +70,5 @@ namespace ResourceManagerAPI.Services
 
             return DbOperationResult.Deleted;
         }
-        public enum DbOperationResult { Deleted, NotFound, InUse }
     }
 }

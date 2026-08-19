@@ -6,13 +6,13 @@ namespace ResourceManagerAPI.Routes
     public static class ResourceRoutes
     {
         public static void MapResourceRoutes(this WebApplication app) {
-            var resources = app.MapGroup("/api/resources").RequireAuthorization();
+            var router = app.MapGroup("/api/resources").RequireAuthorization();
 
-            resources.MapGet("/", GetAllResources);
-            resources.MapGet("/{id}", GetResourceById);
-            resources.MapPost("/", CreateResource);
-            resources.MapPut("/{id}", UpdateResource);
-            resources.MapDelete("/{id}", DeleteResource);
+            router.MapGet("/", GetAllResources);
+            router.MapGet("/{id}", GetResourceById);
+            router.MapPost("/", CreateResource);
+            router.MapPut("/{id}", UpdateResource);
+            router.MapDelete("/{id}", DeleteResource);
         }
 
         public static async Task<IResult> GetAllResources(ResourceService service)
@@ -27,13 +27,13 @@ namespace ResourceManagerAPI.Routes
             return result is not null ? Results.Ok(result) : Results.NotFound();
         }
 
-        public static async Task<IResult> CreateResource(ResourceDto newResource, ResourceService service)
+        public static async Task<IResult> CreateResource(ResourceRequest newResource, ResourceService service)
         {
             var result = await service.CreateResource(newResource);
 
-            return Results.Ok(result);
+            return result is not null ? Results.Ok(result) : Results.BadRequest();
         }
-        public static async Task<IResult> UpdateResource(Guid id, ResourceDto updatedResource, ResourceService service)
+        public static async Task<IResult> UpdateResource(Guid id, ResourceRequest updatedResource, ResourceService service)
         {
             var result = await service.UpdateResource(id, updatedResource);
 
@@ -46,9 +46,10 @@ namespace ResourceManagerAPI.Routes
 
             return result switch
             {
-                ResourceService.DbOperationResult.Deleted => Results.NoContent(),
-                ResourceService.DbOperationResult.NotFound => Results.NotFound(),
-                ResourceService.DbOperationResult.InUse => Results.Conflict(),
+                DbOperationResult.Deleted => Results.NoContent(),
+                DbOperationResult.NotFound => Results.NotFound(),
+                DbOperationResult.InUse => Results.Conflict(),
+                DbOperationResult.UnAuthorized => Results.Unauthorized(),
                 _ => Results.Problem()
             };
 

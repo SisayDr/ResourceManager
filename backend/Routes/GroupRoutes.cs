@@ -1,8 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using ResourceManagerAPI.DTOs;
-using ResourceManagerAPI.Models;
+﻿using ResourceManagerAPI.DTOs;
 using ResourceManagerAPI.Services;
-using static ResourceManagerAPI.Services.GroupService;
 
 namespace ResourceManagerAPI.Routes
 {
@@ -11,13 +8,13 @@ namespace ResourceManagerAPI.Routes
         public static void MapGroupRoutes(this WebApplication app)
         {
             app.MapGet("/api/groups/", GetAllGroups).RequireAuthorization();
-            var groups = app.MapGroup("/api/groups").RequireAuthorization("AdminOnly");
+            var router = app.MapGroup("/api/groups").RequireAuthorization("AdminOnly");
 
             //groups.MapGet("/", GetAllGroups);
-            groups.MapGet("/{id}", GetGroupById);
-            groups.MapPost("/", CreateGroup);
-            groups.MapPut("/{id}", UpdateGroup);
-            groups.MapDelete("/{id}", DeleteGroup);
+            router.MapGet("/{id}", GetGroupById);
+            router.MapPost("/", CreateGroup);
+            router.MapPut("/{id}", UpdateGroup);
+            router.MapDelete("/{id}", DeleteGroup);
         }
 
         public static async Task<IResult> GetAllGroups(GroupService service)

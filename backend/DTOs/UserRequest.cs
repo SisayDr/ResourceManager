@@ -4,13 +4,16 @@ public record UserRequest(
     string FullName,
     string Email,
     string Password,
-    string Role
+    string Role,
+    Guid? GroupId
+
 );
 public record UserUpdateRequest(
     string FullName,
     string Email,
     string? Password,
-    string? Role
+    string? Role,
+    Guid? GroupId
 );
 
 public record ChangePasswordRequest(

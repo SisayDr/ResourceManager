@@ -7,6 +7,7 @@
             app.MapGroupRoutes();
             app.MapResourceTypeRoutes();
             app.MapResourceRoutes();
+            app.MapReservationRoutes();
 
         }
     }

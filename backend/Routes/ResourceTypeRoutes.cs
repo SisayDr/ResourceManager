@@ -1,4 +1,5 @@
-﻿using ResourceManagerAPI.DTOs;
+﻿using Microsoft.AspNetCore.Components.Routing;
+using ResourceManagerAPI.DTOs;
 using ResourceManagerAPI.Services;
 
 namespace ResourceManagerAPI.Routes
@@ -7,13 +8,13 @@ namespace ResourceManagerAPI.Routes
     {
         public static void MapResourceTypeRoutes(this WebApplication app)
         {
-            var resourceTypes = app.MapGroup("/api/resource-types").RequireAuthorization("AdminOnly");
+            var router = app.MapGroup("/api/resource-types").RequireAuthorization("AdminOnly");
 
-            resourceTypes.MapGet("/", GetAllResourceTypes);
-            resourceTypes.MapGet("/{id}", GetResourceTypeById);
-            resourceTypes.MapPost("/", CreateResourceType);
-            resourceTypes.MapPut("/{id}", UpdateResourceType);
-            resourceTypes.MapDelete("/{id}", DeleteResourceType);
+            router.MapGet("/", GetAllResourceTypes);
+            router.MapGet("/{id}", GetResourceTypeById);
+            router.MapPost("/", CreateResourceType);
+            router.MapPut("/{id}", UpdateResourceType);
+            router.MapDelete("/{id}", DeleteResourceType);
         }
 
         public static async Task<IResult> GetAllResourceTypes(ResourceTypeService service)
@@ -46,9 +47,9 @@ namespace ResourceManagerAPI.Routes
 
             return result switch
             {
-                ResourceTypeService.DbOperationResult.Deleted => Results.NoContent(),
-                ResourceTypeService.DbOperationResult.NotFound => Results.NotFound(),
-                ResourceTypeService.DbOperationResult.InUse => Results.Conflict(),
+                DbOperationResult.Deleted => Results.NoContent(),
+                DbOperationResult.NotFound => Results.NotFound(),
+                DbOperationResult.InUse => Results.Conflict(),
                 _ => Results.Problem()
             };
 

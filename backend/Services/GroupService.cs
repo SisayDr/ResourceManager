@@ -52,7 +52,6 @@ namespace ResourceManagerAPI.Services
             db.SaveChanges();
             return DbOperationResult.Deleted;
         }
-        public enum DbOperationResult {Deleted, NotFound, InUse }
 
     }
 }

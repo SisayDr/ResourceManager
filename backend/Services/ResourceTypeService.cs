@@ -53,7 +53,6 @@ namespace ResourceManagerAPI.Services
 
             return DbOperationResult.Deleted;
         }
-        public enum DbOperationResult { Deleted, NotFound, InUse }
     }
 
 }

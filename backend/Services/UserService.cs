@@ -7,7 +7,7 @@ using ResourceManagerAPI.Models;
 
 namespace ResourceManagerAPI.Services
 {
-    public class UserService (AppDbContext db, UserManager<User> userManager, SignInManager<User> signInManager, UserAccessor userAccessor)
+    public class UserService (AppDbContext db, UserManager<User> userManager, SignInManager<User> signInManager, CurrentUserService userAccessor)
     {
         public async Task<List<UserResponse>> GetAllUsers()
         {
@@ -30,7 +30,7 @@ namespace ResourceManagerAPI.Services
         }
         public async Task<IdentityResult> CreateUser(UserRequest request)
         {
-            var newUser = new User { UserName = request.Email, Email = request.Email, FullName = request.FullName};
+            var newUser = new User { UserName = request.Email, Email = request.Email, FullName = request.FullName, GroupId = request.GroupId};
 
             var result = await userManager.CreateAsync(newUser, request.Password);
             if (!result.Succeeded) { return result; }
@@ -40,7 +40,7 @@ namespace ResourceManagerAPI.Services
 
         public async Task<IdentityResult?> UpdateUser(string  id, UserUpdateRequest updatedUser)
         {
-            var currentUser = await userAccessor.GetCurrentUserAsync();
+            var currentUser = await userAccessor.GetProfileAsync();
             var user = await userManager.FindByIdAsync(id);
             if (user == null || currentUser == null) {return null;}
 
@@ -51,10 +51,12 @@ namespace ResourceManagerAPI.Services
             user.FullName = updatedUser.FullName;
             user.Email = updatedUser.Email;
             user.UserName = updatedUser.Email;
+            if(isAdmin && updatedUser.GroupId is not null) user.GroupId = (Guid) updatedUser.GroupId;
 
             var result = await userManager.UpdateAsync(user);
             if(!result.Succeeded || !isAdmin) { return result; }
 
+            //Admins only section
             if(updatedUser.Password is not null)
             {
                 var token = await userManager.GeneratePasswordResetTokenAsync(user);
@@ -87,6 +89,6 @@ namespace ResourceManagerAPI.Services
         }
         public async Task Logout() { await signInManager.SignOutAsync(); }
 
-        public async Task<UserResponse?> GetCurrentUser(){return await userAccessor.GetCurrentUserAsync();}
+        public async Task<UserResponse?> GetCurrentUser(){return await userAccessor.GetProfileAsync();}
     }
 }

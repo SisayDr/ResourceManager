@@ -3,5 +3,6 @@ public record UserResponse(
     string Id,
     string FullName,
     string Email,
-    string? Role
+    string? Role,
+    Guid? GroupId
 );
