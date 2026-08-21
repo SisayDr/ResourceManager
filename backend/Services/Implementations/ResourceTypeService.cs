@@ -2,10 +2,11 @@
 using ResourceManagerAPI.Data;
 using ResourceManagerAPI.DTOs;
 using ResourceManagerAPI.Models;
+using ResourceManagerAPI.Services.Interfaces;
 
-namespace ResourceManagerAPI.Services
+namespace ResourceManagerAPI.Services.Implementations
 {
-    public class ResourceTypeService(AppDbContext db)
+    public class ResourceTypeService(AppDbContext db) : IResourceTypeService
     {
         public async Task<List<ResourceType>> GetAllResourceTypes() {
             var resourceTypes = await db.ResourceTypes.ToListAsync();

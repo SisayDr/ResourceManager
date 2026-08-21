@@ -1,17 +1,19 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using ResourceManagerAPI.Data;
 using ResourceManagerAPI.DTOs;
 using ResourceManagerAPI.Extensions;
 using ResourceManagerAPI.Models;
+using ResourceManagerAPI.Services.Interfaces;
 
-namespace ResourceManagerAPI.Services
+namespace ResourceManagerAPI.Services.Implementations
 {
-    public class CurrentUserService(IHttpContextAccessor httpContextAccessor, UserManager<User> userManager)
+    public class CurrentUserService(IHttpContextAccessor httpContextAccessor, UserManager<User> userManager, AppDbContext db) : ICurrentUserService
     {
         public async Task<UserResponse?> GetProfileAsync()
         {
             var user = await userManager.GetUserAsync(httpContextAccessor.HttpContext!.User);
             if (user is null) return null;
-            return await user.ToUserResponseAsync(userManager);
+            return await user.ToUserResponseAsync(userManager, db);
         }
         public async Task<string?> GetIdAsync()
         {

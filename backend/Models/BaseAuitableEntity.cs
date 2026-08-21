@@ -1,7 +1,8 @@
 ﻿namespace ResourceManagerAPI.Models
 {
-    public abstract class BaseAuditableEntity : BaseEntity
+    public abstract class BaseAuditableEntity
     {
+        public Guid Id { get; protected set; } = Guid.NewGuid();
         public DateTimeOffset CreatedAt { get; protected set; }
         public string? CreatedBy { get; protected set; }
 

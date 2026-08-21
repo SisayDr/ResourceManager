@@ -3,10 +3,11 @@ using ResourceManagerAPI.Data;
 using ResourceManagerAPI.DTOs;
 using ResourceManagerAPI.Extensions;
 using ResourceManagerAPI.Models;
+using ResourceManagerAPI.Services.Interfaces;
 
-namespace ResourceManagerAPI.Services
+namespace ResourceManagerAPI.Services.Implementations
 {
-    public class ResourceService(AppDbContext db, CurrentUserService currentUser)
+    public class ResourceService(AppDbContext db, ICurrentUserService currentUser) :IResourceService
     {
         public async Task<List<Resource>> GetAllResources()
         {

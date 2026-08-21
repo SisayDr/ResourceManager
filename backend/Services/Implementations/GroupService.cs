@@ -2,10 +2,11 @@
 using ResourceManagerAPI.Data;
 using ResourceManagerAPI.DTOs;
 using ResourceManagerAPI.Models;
+using ResourceManagerAPI.Services.Interfaces;
 
-namespace ResourceManagerAPI.Services
+namespace ResourceManagerAPI.Services.Implementations
 {
-    public class GroupService(AppDbContext db)
+    public class GroupService(AppDbContext db) : IGroupService
     {
         public async Task<List<Group>> GetAllGroups()
         {

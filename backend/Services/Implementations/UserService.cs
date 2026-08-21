@@ -4,10 +4,11 @@ using ResourceManagerAPI.Data;
 using ResourceManagerAPI.DTOs;
 using ResourceManagerAPI.Extensions;
 using ResourceManagerAPI.Models;
+using ResourceManagerAPI.Services.Interfaces;
 
-namespace ResourceManagerAPI.Services
+namespace ResourceManagerAPI.Services.Implementations
 {
-    public class UserService (AppDbContext db, UserManager<User> userManager, SignInManager<User> signInManager, CurrentUserService userAccessor)
+    public class UserService (AppDbContext db, UserManager<User> userManager, SignInManager<User> signInManager, ICurrentUserService userAccessor) : IUserService
     {
         public async Task<List<UserResponse>> GetAllUsers()
         {
@@ -15,7 +16,7 @@ namespace ResourceManagerAPI.Services
             var result = new List<UserResponse>();
 
             foreach (var user in users) { 
-                result.Add(await user.ToUserResponseAsync(userManager));
+                result.Add(await user.ToUserResponseAsync(userManager, db));
             }
 
             return result;
@@ -26,7 +27,7 @@ namespace ResourceManagerAPI.Services
             var user = await db.Users.FirstOrDefaultAsync(u => u.Id == id);
 
             if (user is null) return null;
-            return await user.ToUserResponseAsync(userManager);
+            return await user.ToUserResponseAsync(userManager, db);
         }
         public async Task<IdentityResult> CreateUser(UserRequest request)
         {

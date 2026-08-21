@@ -20,3 +20,13 @@ public record ChangePasswordRequest(
     string CurrentPassword,
     string NewPassword
 );
+
+public record UserResponse(
+    string Id,
+    string FullName,
+    string Email,
+    string? Role,
+    string? Group,
+    Guid? GroupId
+
+);

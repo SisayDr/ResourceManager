@@ -1,5 +1,5 @@
 ﻿using ResourceManagerAPI.DTOs;
-using ResourceManagerAPI.Services;
+using ResourceManagerAPI.Services.Interfaces;
 
 namespace ResourceManagerAPI.Routes
 {
@@ -17,27 +17,27 @@ namespace ResourceManagerAPI.Routes
             router.MapDelete("/{id}", DeleteGroup);
         }
 
-        public static async Task<IResult> GetAllGroups(GroupService service)
+        public static async Task<IResult> GetAllGroups(IGroupService service)
         {
             return Results.Ok(await service.GetAllGroups());
         }
-        public static async Task<IResult> GetGroupById(Guid id, GroupService service)
+        public static async Task<IResult> GetGroupById(Guid id, IGroupService service)
         {
             var group = await service.GetGroupById(id);
             return group is not null ? Results.Ok(group) : Results.NotFound();
         }
-        public static async Task<IResult> CreateGroup(GroupDto newGroup, GroupService service)
+        public static async Task<IResult> CreateGroup(GroupDto newGroup, IGroupService service)
         {
             var result = await service.CreateGroup(newGroup);
             return result is not null ? Results.Ok(result) : Results.Conflict(new {message = "Group already exits."});
         }
-        public static async Task<IResult> UpdateGroup(Guid id, GroupDto UpdatedGroup, GroupService service)
+        public static async Task<IResult> UpdateGroup(Guid id, GroupDto UpdatedGroup, IGroupService service)
         {
             var result = await service.UpdateGroup(id, UpdatedGroup);
 
             return Results.Ok(result);
         }
-        public static async Task<IResult> DeleteGroup(Guid id, GroupService service)
+        public static async Task<IResult> DeleteGroup(Guid id, IGroupService service)
         {
             var result = await service.DeleteGroup(id);
 

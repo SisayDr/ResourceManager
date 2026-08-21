@@ -3,10 +3,11 @@ using ResourceManagerAPI.Data;
 using ResourceManagerAPI.DTOs;
 using ResourceManagerAPI.Extensions;
 using ResourceManagerAPI.Models;
+using ResourceManagerAPI.Services.Interfaces;
 
-namespace ResourceManagerAPI.Services
+namespace ResourceManagerAPI.Services.Implementations
 {
-    public class ReservationService(AppDbContext db, CurrentUserService currentUser)
+    public class ReservationService(AppDbContext db, ICurrentUserService currentUser) : IReservationService
     {
         public async Task<List<ReservationResponse>> GetAllReservations() {
             var reservations = await db.Reservations.Include(r => r.Resource).Include(r => r.User).ToListAsync();

@@ -1,5 +1,5 @@
 ﻿using ResourceManagerAPI.DTOs;
-using ResourceManagerAPI.Services;
+using ResourceManagerAPI.Services.Interfaces;
 
 namespace ResourceManagerAPI.Routes
 {
@@ -15,32 +15,32 @@ namespace ResourceManagerAPI.Routes
             router.MapDelete("/{id}", DeleteResource);
         }
 
-        public static async Task<IResult> GetAllResources(ResourceService service)
+        public static async Task<IResult> GetAllResources(IResourceService service)
         {
             var result = await service.GetAllResources();
 
             return Results.Ok(result);
         }
-        public static async Task<IResult> GetResourceById(Guid id, ResourceService service)
+        public static async Task<IResult> GetResourceById(Guid id, IResourceService service)
         {
             var result = await service.GetResourcebyId(id);
             return result is not null ? Results.Ok(result) : Results.NotFound();
         }
 
-        public static async Task<IResult> CreateResource(ResourceRequest newResource, ResourceService service)
+        public static async Task<IResult> CreateResource(ResourceRequest newResource, IResourceService service)
         {
             var result = await service.CreateResource(newResource);
 
             return result is not null ? Results.Ok(result) : Results.BadRequest();
         }
-        public static async Task<IResult> UpdateResource(Guid id, ResourceRequest updatedResource, ResourceService service)
+        public static async Task<IResult> UpdateResource(Guid id, ResourceRequest updatedResource, IResourceService service)
         {
             var result = await service.UpdateResource(id, updatedResource);
 
             return result is not null ? Results.Ok(result) : Results.NotFound();
         }
 
-        public static async Task<IResult> DeleteResource(Guid id, ResourceService service)
+        public static async Task<IResult> DeleteResource(Guid id, IResourceService service)
         {
             var result = await service.DeleteResource(id);
 

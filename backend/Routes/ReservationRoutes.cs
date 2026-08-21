@@ -1,5 +1,5 @@
 ﻿using ResourceManagerAPI.DTOs;
-using ResourceManagerAPI.Services;
+using ResourceManagerAPI.Services.Interfaces;
 
 namespace ResourceManagerAPI.Routes
 {
@@ -17,32 +17,32 @@ namespace ResourceManagerAPI.Routes
             router.MapDelete("/{id}", DeleteReservation);
         }
 
-        public static async Task<IResult> GetAllReservations(ReservationService service)
+        public static async Task<IResult> GetAllReservations(IReservationService service)
         {
             var result = await service.GetAllReservations();
             return Results.Ok(result);
         }
-        public static async Task<IResult> GetReservation(Guid id, ReservationService service)
+        public static async Task<IResult> GetReservation(Guid id, IReservationService service)
         {
             var result = await service.GetReservationById(id);
             return result is null ? Results.NotFound() : Results.Ok(result);
         }
-        public static async Task<IResult> GetPendingReservations(ReservationService service)
+        public static async Task<IResult> GetPendingReservations(IReservationService service)
         {
             var result = await service.GetPendingReservations();
             return result is null ? Results.NotFound() : Results.Ok(result);
         }
-        public static async Task<IResult> CreateReservation(ReservationRequest request, ReservationService service)
+        public static async Task<IResult> CreateReservation(ReservationRequest request, IReservationService service)
         {
             var result = await service.CreateReservation(request);
             return result is null ? Results.BadRequest() : Results.Ok(result);
         }
-        public static async Task<IResult> UpdateReservation(Guid id, ReservationRequest request, ReservationService service)
+        public static async Task<IResult> UpdateReservation(Guid id, ReservationRequest request, IReservationService service)
         {
             var result = await service.UpdateReservation(id, request);
             return result is null ? Results.BadRequest() : Results.Ok(result);
         }
-        public static async Task<IResult> DeleteReservation(Guid id, ReservationService service)
+        public static async Task<IResult> DeleteReservation(Guid id, IReservationService service)
         {
             var result = await service.DeleteReservation(id);
             return result switch
