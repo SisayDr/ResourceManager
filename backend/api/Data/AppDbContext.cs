@@ -17,7 +17,7 @@ namespace ResourceManagerAPI.Data{
             SetAuditableProps();
             return await base.SaveChangesAsync(cancellationToken);
         }
-        private async void SetAuditableProps(){
+        private void SetAuditableProps(){
             string? userId = httpContextAccessor.HttpContext?.User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             userId = userId is not null ? userId: "UNKOWN";
             foreach (var entry in ChangeTracker.Entries<BaseAuditableEntity>()){

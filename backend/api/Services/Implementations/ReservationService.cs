@@ -62,7 +62,7 @@ namespace ResourceManagerAPI.Services.Implementations
             var reservation = await db.Reservations.Include(r => r.Resource).Include(r => r.User).FirstOrDefaultAsync(r => r.Id == id);
             var isOwnGroup = await currentUser.CanAccessGroupAsync(reservation.Resource.GroupId);
 
-            if (!isOwnGroup || !await currentUser.IsCreatorOfAsync(reservation)) return null;
+            if (!isOwnGroup && !await currentUser.IsCreatorOfAsync(reservation)) return null;
             reservation.Start = request.Start;
             reservation.End = request.End;
             reservation.BookedCapacity = request.BookedCapacity;
