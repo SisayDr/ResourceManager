@@ -1,47 +1,151 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Moq;
+using ResourceManagerAPI.Data;
+using ResourceManagerAPI.DTOs;
+using ResourceManagerAPI.Models;
+using ResourceManagerAPI.Services.Implementations;
+using ResourceManagerAPI.Services.Interfaces;
 
 namespace ResourceManagerAPI.Tests.Units
 {
-    internal class ReservationServiceTests
+    public class ReservationServiceTests
     {
-        // TODO: GetAllReservations - returns only reservations the current user is allowed to access
+        private readonly AppDbContext _db;
+        private readonly Mock<ICurrentUserService> _currentUser;
+        private readonly ReservationService _service;
 
-        // TODO: GetAllReservations - includes reservations created by the current user even without group access
+        public ReservationServiceTests()
+        {
+            _db = TestFactory.GetDbContext();
+            _currentUser = new Mock<ICurrentUserService>();
+            _service = new ReservationService(_db, _currentUser.Object);
+        }
+
+        [Fact]
+        public async Task GetAllReservations_ReturnsReservations_WhenUserHasAccess()
+        {
+            //Arrange
+            var reservation1 = await TestFactory.SeedReservation(_db);
+            var reservation2 = await TestFactory.SeedReservation(_db); 
+            var reservation3 = await TestFactory.SeedReservation(_db);
+
+            _currentUser.Setup(c => c.CanAccessGroupAsync(reservation1.Resource.GroupId)).ReturnsAsync(true);
+            _currentUser.Setup(c => c.CanAccessGroupAsync(reservation2.Resource.GroupId)).ReturnsAsync(true);
+            _currentUser.Setup(c => c.CanAccessGroupAsync(reservation3.Resource.GroupId)).ReturnsAsync(false);
+
+            //Act
+            var result = await _service.GetAllReservations();
+
+            //Assert
+            Assert.Equal(2, result.Count);
+            Assert.DoesNotContain(result, r => r.Id  == reservation3.Id);
+        }
+
+        [Fact]
+        public async Task GetReservationById_ReturnsReservation_WhenUserHasAccess()
+        {
+            var reservation = await TestFactory.SeedReservation(_db);
+            _currentUser.Setup(c => c.CanAccessGroupAsync(reservation.Resource.GroupId)).ReturnsAsync(true);
+
+            var result = await _service.GetReservationById(reservation.Id);
+
+            Assert.NotNull(result);
+            Assert.Equal(reservation.Id, result.Id);
+        }
 
 
-        // TODO: GetPendingReservations - returns only pending reservations the current user is allowed to access
+        [Fact]
+        public async Task CreateReservation_ReturnsNull_WhenStartIsInThePast()
+        {
+            var reservation = await TestFactory.SeedReservation(_db);
+            var request = new ReservationRequest(DateTimeOffset.UtcNow.AddHours(-1),DateTimeOffset.UtcNow.AddHours(2), 10, null, reservation.ResourceId);
+         
+            var result = await _service.CreateReservation(request);
 
+            Assert.Null(result);
+        }
 
-        // TODO: GetReservationById - returns the reservation when the user has access
+        [Fact]
+        public async Task CreateReservation_ReturnsNull_WhenCapacityExceeds()
+        {
+            var reservation = await TestFactory.SeedReservation(_db);
+            var request = new ReservationRequest(DateTimeOffset.UtcNow.AddHours(1), DateTimeOffset.UtcNow.AddHours(2), 12, null, reservation.ResourceId);
 
-        // TODO: GetReservationById - returns null when the reservation doesn't exist or the user isn't authorized
+            var result = await _service.CreateReservation(request);
 
+            Assert.Null(result);
+        }
 
-        // TODO: CreateReservation - rejects an invalid reservation request
+        [Fact]
+        public async Task CreateReservation_ReturnsConfirmedReservation_WhenUserHasAccessToGroup()
+        {
+            var reservation = await TestFactory.SeedReservation(_db);
+            var request = new ReservationRequest(DateTimeOffset.UtcNow.AddHours(1), DateTimeOffset.UtcNow.AddHours(2), 10, null, reservation.ResourceId);
+            _currentUser.Setup(c => c.CanAccessGroupAsync(reservation.Resource.GroupId)).ReturnsAsync(true);
 
-        // TODO: CreateReservation - creates a Confirmed reservation when the user has group access
+            var result = await _service.CreateReservation(request);
 
-        // TODO: CreateReservation - creates a Pending reservation when the user doesn't have group access
+            Assert.NotNull(result);
+            Assert.Equal(ReservationStatus.Confirmed, result.Status);
+        }
 
+        [Fact]
+        public async Task CreateReservation_ReturnsPendingReservation_WhenUserHasNoAccessToGroup()
+        {
+            var reservation = await TestFactory.SeedReservation(_db);
+            var request = new ReservationRequest(DateTimeOffset.UtcNow.AddHours(1), DateTimeOffset.UtcNow.AddHours(2), 10, null, reservation.ResourceId);
 
-        // TODO: UpdateReservation - rejects an invalid reservation request
+            var result = await _service.CreateReservation(request);
 
-        // TODO: UpdateReservation - allows the creator or group member to update the reservation
+            Assert.NotNull(result);
+            Assert.Equal(ReservationStatus.Pending, result.Status);
+        }
 
-        // TODO: UpdateReservation - prevents unauthorized users from updating the reservation
+        [Fact]
+        public async Task UpdateReservation_ReturnsUpdatedReservationExceptStatus_WhenUserIsCreator()
+        {
+            var reservation = await TestFactory.SeedReservation(_db);
+            var request = new ReservationRequest(DateTimeOffset.UtcNow.AddHours(1), DateTimeOffset.UtcNow.AddHours(2), 5, ReservationStatus.Canceled, reservation.ResourceId);
+            _currentUser.Setup(c => c.IsCreatorOfAsync(reservation)).ReturnsAsync(true);
+            _currentUser.Setup(c => c.CanAccessGroupAsync(reservation.Resource.GroupId)).ReturnsAsync(false);
 
+            var result = await _service.UpdateReservation(reservation.Id, request);
 
-        // TODO: DeleteReservation - returns NotFound when the reservation doesn't exist
+            Assert.NotNull(result);
+            Assert.Equal(5, result.BookedCapacity);
+            Assert.Equal(reservation.Status, result.Status);
+        }
 
-        // TODO: DeleteReservation - prevents users who aren't the creator from deleting
+        [Fact]
+        public async Task DeleteReservation_ReturnsNotFound_WhenReservationDoesNotExist()
+        {
+            var id = Guid.NewGuid();
 
-        // TODO: DeleteReservation - deletes the reservation when the creator requests it
+            var result = await _service.DeleteReservation(id);
 
+            Assert.Equal(DbOperationResult.NotFound, result);
+        }
 
-        // TODO: Reservation validation - rejects overlapping reservations when there isn't enough capacity
+        [Fact]
+        public async Task DeleteReservation_ReturnsUnAuthorized_WhenUserIsNotTheCreator()
+        {
+            var reservation = await TestFactory.SeedReservation(_db);
+            _currentUser.Setup(c => c.IsCreatorOfAsync(reservation)).ReturnsAsync(false);
 
-        // TODO: Reservation validation - allows a reservation when there is enough capacity
+            var result = await _service.DeleteReservation(reservation.Id);
+
+            Assert.Equal(DbOperationResult.UnAuthorized, result);
+        }
+
+        [Fact]
+        public async Task DeleteReservation_ReturnsDeleted_WhenUserIsTheCreator()
+        {
+            var reservation = await TestFactory.SeedReservation(_db);
+            _currentUser.Setup(c => c.IsCreatorOfAsync(reservation)).ReturnsAsync(true);
+
+            var result = await _service.DeleteReservation(reservation.Id);
+
+            Assert.Equal(DbOperationResult.Deleted, result);
+        }
+
     }
 }

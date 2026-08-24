@@ -8,7 +8,7 @@ namespace ResourceManagerAPI.Extensions
     {
         public static ReservationResponse ToReservationResponse(this Reservation reservation)
         {
-            return new ReservationResponse(reservation.Id, reservation.Start, reservation.End, reservation.BookedCapacity, reservation.Status, reservation.Resource.Name, reservation.User.FullName);
+            return new ReservationResponse(reservation.Id, reservation.Start, reservation.End, reservation.BookedCapacity, reservation.Status, reservation.Resource.Name, reservation.User?.FullName);
         }
         public static Reservation ToReservation(this ReservationRequest request)
         {
