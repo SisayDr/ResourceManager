@@ -3,6 +3,7 @@ using ResourceManagerAPI.DTOs;
 using ResourceManagerAPI.Data;
 using ResourceManagerAPI.Models;
 using ResourceManagerAPI.Services.Implementations;
+using ResourceManagerAPI.Tests.Helpers;
 
 namespace ResourceManagerAPI.Tests.Units
 {
@@ -12,7 +13,7 @@ namespace ResourceManagerAPI.Tests.Units
         private readonly GroupService _service;
         public GroupServiceTests()
         {
-            _db = TestFactory.GetDbContext();
+            _db = UnitTestsFactory.GetDbContext();
             _service = new GroupService(_db);
         }
 

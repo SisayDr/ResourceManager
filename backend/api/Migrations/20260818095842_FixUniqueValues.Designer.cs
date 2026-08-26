@@ -13,7 +13,7 @@ namespace ResourceManagerAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
     [Migration("20260818095842_fix-unique-values")]
-    partial class fixuniquevalues
+    partial class FixUniqueValues
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

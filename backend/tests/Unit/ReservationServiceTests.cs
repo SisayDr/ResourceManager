@@ -4,6 +4,7 @@ using ResourceManagerAPI.DTOs;
 using ResourceManagerAPI.Models;
 using ResourceManagerAPI.Services.Implementations;
 using ResourceManagerAPI.Services.Interfaces;
+using ResourceManagerAPI.Tests.Helpers;
 
 namespace ResourceManagerAPI.Tests.Units
 {
@@ -15,7 +16,7 @@ namespace ResourceManagerAPI.Tests.Units
 
         public ReservationServiceTests()
         {
-            _db = TestFactory.GetDbContext();
+            _db = UnitTestsFactory.GetDbContext();
             _currentUser = new Mock<ICurrentUserService>();
             _service = new ReservationService(_db, _currentUser.Object);
         }
@@ -24,9 +25,9 @@ namespace ResourceManagerAPI.Tests.Units
         public async Task GetAllReservations_ReturnsReservations_WhenUserHasAccess()
         {
             //Arrange
-            var reservation1 = await TestFactory.SeedReservation(_db);
-            var reservation2 = await TestFactory.SeedReservation(_db); 
-            var reservation3 = await TestFactory.SeedReservation(_db);
+            var reservation1 = await UnitTestsFactory.SeedReservation(_db);
+            var reservation2 = await UnitTestsFactory.SeedReservation(_db); 
+            var reservation3 = await UnitTestsFactory.SeedReservation(_db);
 
             _currentUser.Setup(c => c.CanAccessGroupAsync(reservation1.Resource.GroupId)).ReturnsAsync(true);
             _currentUser.Setup(c => c.CanAccessGroupAsync(reservation2.Resource.GroupId)).ReturnsAsync(true);
@@ -43,7 +44,7 @@ namespace ResourceManagerAPI.Tests.Units
         [Fact]
         public async Task GetReservationById_ReturnsReservation_WhenUserHasAccess()
         {
-            var reservation = await TestFactory.SeedReservation(_db);
+            var reservation = await UnitTestsFactory.SeedReservation(_db);
             _currentUser.Setup(c => c.CanAccessGroupAsync(reservation.Resource.GroupId)).ReturnsAsync(true);
 
             var result = await _service.GetReservationById(reservation.Id);
@@ -56,7 +57,7 @@ namespace ResourceManagerAPI.Tests.Units
         [Fact]
         public async Task CreateReservation_ReturnsNull_WhenStartIsInThePast()
         {
-            var reservation = await TestFactory.SeedReservation(_db);
+            var reservation = await UnitTestsFactory.SeedReservation(_db);
             var request = new ReservationRequest(DateTimeOffset.UtcNow.AddHours(-1),DateTimeOffset.UtcNow.AddHours(2), 10, null, reservation.ResourceId);
          
             var result = await _service.CreateReservation(request);
@@ -67,7 +68,7 @@ namespace ResourceManagerAPI.Tests.Units
         [Fact]
         public async Task CreateReservation_ReturnsNull_WhenCapacityExceeds()
         {
-            var reservation = await TestFactory.SeedReservation(_db);
+            var reservation = await UnitTestsFactory.SeedReservation(_db);
             var request = new ReservationRequest(DateTimeOffset.UtcNow.AddHours(1), DateTimeOffset.UtcNow.AddHours(2), 12, null, reservation.ResourceId);
 
             var result = await _service.CreateReservation(request);
@@ -78,7 +79,7 @@ namespace ResourceManagerAPI.Tests.Units
         [Fact]
         public async Task CreateReservation_ReturnsConfirmedReservation_WhenUserHasAccessToGroup()
         {
-            var reservation = await TestFactory.SeedReservation(_db);
+            var reservation = await UnitTestsFactory.SeedReservation(_db);
             var request = new ReservationRequest(DateTimeOffset.UtcNow.AddHours(1), DateTimeOffset.UtcNow.AddHours(2), 10, null, reservation.ResourceId);
             _currentUser.Setup(c => c.CanAccessGroupAsync(reservation.Resource.GroupId)).ReturnsAsync(true);
 
@@ -91,7 +92,7 @@ namespace ResourceManagerAPI.Tests.Units
         [Fact]
         public async Task CreateReservation_ReturnsPendingReservation_WhenUserHasNoAccessToGroup()
         {
-            var reservation = await TestFactory.SeedReservation(_db);
+            var reservation = await UnitTestsFactory.SeedReservation(_db);
             var request = new ReservationRequest(DateTimeOffset.UtcNow.AddHours(1), DateTimeOffset.UtcNow.AddHours(2), 10, null, reservation.ResourceId);
 
             var result = await _service.CreateReservation(request);
@@ -103,7 +104,7 @@ namespace ResourceManagerAPI.Tests.Units
         [Fact]
         public async Task UpdateReservation_ReturnsUpdatedReservationExceptStatus_WhenUserIsCreator()
         {
-            var reservation = await TestFactory.SeedReservation(_db);
+            var reservation = await UnitTestsFactory.SeedReservation(_db);
             var request = new ReservationRequest(DateTimeOffset.UtcNow.AddHours(1), DateTimeOffset.UtcNow.AddHours(2), 5, ReservationStatus.Canceled, reservation.ResourceId);
             _currentUser.Setup(c => c.IsCreatorOfAsync(reservation)).ReturnsAsync(true);
             _currentUser.Setup(c => c.CanAccessGroupAsync(reservation.Resource.GroupId)).ReturnsAsync(false);
@@ -128,7 +129,7 @@ namespace ResourceManagerAPI.Tests.Units
         [Fact]
         public async Task DeleteReservation_ReturnsUnAuthorized_WhenUserIsNotTheCreator()
         {
-            var reservation = await TestFactory.SeedReservation(_db);
+            var reservation = await UnitTestsFactory.SeedReservation(_db);
             _currentUser.Setup(c => c.IsCreatorOfAsync(reservation)).ReturnsAsync(false);
 
             var result = await _service.DeleteReservation(reservation.Id);
@@ -139,7 +140,7 @@ namespace ResourceManagerAPI.Tests.Units
         [Fact]
         public async Task DeleteReservation_ReturnsDeleted_WhenUserIsTheCreator()
         {
-            var reservation = await TestFactory.SeedReservation(_db);
+            var reservation = await UnitTestsFactory.SeedReservation(_db);
             _currentUser.Setup(c => c.IsCreatorOfAsync(reservation)).ReturnsAsync(true);
 
             var result = await _service.DeleteReservation(reservation.Id);

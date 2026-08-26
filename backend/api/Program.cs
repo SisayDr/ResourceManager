@@ -10,10 +10,11 @@ using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddDbContext<AppDbContext>(option => option.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddIdentity<User, IdentityRole>().AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
 
-builder.Services.AddAuthorization(options => options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin")));
+builder.Services.AddAuthorizationBuilder().AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.Events.OnRedirectToLogin = context => { context.Response.StatusCode = 401; return Task.CompletedTask; };
@@ -25,8 +26,7 @@ builder.Services.ConfigureHttpJsonOptions(options => options.SerializerOptions.C
 
 var app = builder.Build();
 
-using var scope = app.Services.CreateScope();
-await ServicesHanlder.SeedRoles(scope.ServiceProvider);
+await app.SeedRoles();
 
 if (app.Environment.IsDevelopment())
 {
@@ -41,3 +41,4 @@ app.UseAuthorization();
 app.MapRoutes();
  
 app.Run();
+

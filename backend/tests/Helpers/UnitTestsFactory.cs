@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using ResourceManagerAPI.Data;
 using ResourceManagerAPI.Models;
 
-namespace ResourceManagerAPI.Tests
+namespace ResourceManagerAPI.Tests.Helpers
 {
-    public static class TestFactory
+    public static class UnitTestsFactory
     {
         public static AppDbContext GetDbContext() {
             var options = new DbContextOptionsBuilder<AppDbContext>().UseInMemoryDatabase(Guid.NewGuid().ToString()).Options;
@@ -14,13 +14,13 @@ namespace ResourceManagerAPI.Tests
         }
         public static async Task<Reservation> SeedReservation(AppDbContext db)
         {
-            var group = new Group { Name = "TestGroup" };
-            var user = new User { FullName = "TestUser", GroupId = group.Id };
-            var resourceType = new ResourceType { Name = "TestResourceType" };
+            var group = new Group { Name = $"TestGroup{Guid.NewGuid()}" };
+            var user = new User { FullName = $"TestUser{Guid.NewGuid()}", GroupId = group.Id };
+            var resourceType = new ResourceType { Name = $"TestResourceType{Guid.NewGuid()}" };
 
             var resource = new Resource
             {
-                Name = "TestResource",
+                Name = $"TestResource{Guid.NewGuid()}",
                 TotalCapacity = 20,
                 GroupId = group.Id,
                 ResourceTypeId = resourceType.Id,

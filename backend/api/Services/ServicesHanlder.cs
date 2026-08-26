@@ -15,9 +15,10 @@ namespace ResourceManagerAPI.Services
             builder.Services.AddScoped<IReservationService, ReservationService>();
         }
 
-        public static async Task SeedRoles(IServiceProvider services)
+        public static async Task SeedRoles(this WebApplication app)
         {
-            var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+            using var scope = app.Services.CreateScope();
+            var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             string[] roles = ["Admin", "Resource Manager"];
 
             foreach (var role in roles)
