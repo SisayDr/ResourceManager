@@ -5,7 +5,7 @@ using ResourceManagerAPI.Models;
 using ResourceManagerAPI.Services.Implementations;
 using ResourceManagerAPI.Tests.Helpers;
 
-namespace ResourceManagerAPI.Tests.Units
+namespace ResourceManagerAPI.Tests.Unit
 {
     public class GroupServiceTests
     {

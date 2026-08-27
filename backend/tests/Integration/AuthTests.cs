@@ -6,7 +6,7 @@ using ResourceManagerAPI.Tests.Helpers;
 using System.Net;
 using System.Net.Http.Json;
 
-namespace ResourceManagerAPI.Tests.Integrations
+namespace ResourceManagerAPI.Tests.Integration
 {
     public class AuthTests(CustomWebApplicationFactory factory) : IntegrationTestBase(factory)
     {
