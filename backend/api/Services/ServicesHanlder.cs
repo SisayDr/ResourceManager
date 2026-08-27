@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using ResourceManagerAPI.Services.Implementations;
 using ResourceManagerAPI.Services.Interfaces;
+using ResourceManagerAPI.Services.Validators;
 
 namespace ResourceManagerAPI.Services
 {
@@ -13,6 +14,11 @@ namespace ResourceManagerAPI.Services
             builder.Services.AddScoped<IResourceTypeService, ResourceTypeService>();
             builder.Services.AddScoped<IResourceService, ResourceService>();
             builder.Services.AddScoped<IReservationService, ReservationService>();
+
+            builder.Services.AddScoped<IReservationValidator, ReservationTimeValidator>();
+            builder.Services.AddScoped<IReservationValidator, ResourceExistsValidator>();
+            builder.Services.AddScoped<IReservationValidator, ReservationExistsValidator>();
+            builder.Services.AddScoped<IReservationValidator, ReservationCapacityValidator>();
         }
 
         public static async Task SeedRoles(this WebApplication app)

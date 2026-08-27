@@ -1,12 +1,12 @@
 ﻿using Moq;
 using ResourceManagerAPI.Data;
 using ResourceManagerAPI.DTOs;
-using ResourceManagerAPI.Models;
 using ResourceManagerAPI.Services.Implementations;
 using ResourceManagerAPI.Services.Interfaces;
+using ResourceManagerAPI.Services.Validators;
 using ResourceManagerAPI.Tests.Helpers;
 
-namespace ResourceManagerAPI.Tests.Units
+namespace ResourceManagerAPI.Tests.Unit
 {
     public class ReservationServiceTests
     {
@@ -18,7 +18,9 @@ namespace ResourceManagerAPI.Tests.Units
         {
             _db = UnitTestsFactory.GetDbContext();
             _currentUser = new Mock<ICurrentUserService>();
-            _service = new ReservationService(_db, _currentUser.Object);
+            var validators = new List<IReservationValidator> { new ReservationCapacityValidator(_db), new ReservationExistsValidator(_db), new ReservationTimeValidator(), new ResourceExistsValidator(_db) };
+            _service = new ReservationService(_db, _currentUser.Object, validators);
+
         }
 
         [Fact]

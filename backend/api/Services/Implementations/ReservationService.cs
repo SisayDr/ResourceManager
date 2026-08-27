@@ -7,7 +7,7 @@ using ResourceManagerAPI.Services.Interfaces;
 
 namespace ResourceManagerAPI.Services.Implementations
 {
-    public class ReservationService(AppDbContext db, ICurrentUserService currentUser) : IReservationService
+    public class ReservationService(AppDbContext db, ICurrentUserService currentUser, IEnumerable<IReservationValidator> validators) : IReservationService
     {
         public async Task<List<ReservationResponse>> GetAllReservations() {
             var reservations = await db.Reservations.Include(r => r.Resource).Include(r => r.User).ToListAsync();
@@ -87,28 +87,10 @@ namespace ResourceManagerAPI.Services.Implementations
             return DbOperationResult.Deleted;
         }
 
-        private async Task<bool> IsValidReservationRequest (ReservationRequest request, Guid? id = null)
-        {
-            if (request.Start < DateTimeOffset.UtcNow) return false;
-            if (request.Start >= request.End) return false;
-
-            if(!await db.Resources.AnyAsync(r => r.Id == request.ResourceId)) return false;
-
-            if (id is Guid reservationId && !await db.Reservations.AnyAsync(r => r.Id == reservationId)) return false;
-
-            var resourceCapacity = await db.Resources.Where(r => r.Id == request.ResourceId).Select(r => r.TotalCapacity).SingleAsync();
-            var alreadyBooked = await db.Reservations
-                .Where(r =>
-                       r.ResourceId == request.ResourceId &&
-                       r.Start < request.End && r.End > request.Start &&
-                       r.Status == ReservationStatus.Confirmed &&
-                       (!id.HasValue || r.Id != id.Value))
-                .SumAsync(r => r.BookedCapacity);
-
-            var hasCapacity = resourceCapacity - alreadyBooked >= request.BookedCapacity;
-
-            if (!hasCapacity) return false;
-
+        private async Task<bool> IsValidReservationRequest(ReservationRequest request, Guid? id = null){
+            foreach (var validator in validators){
+                if (!await validator.IsValid(request, id)) return false;
+            }
             return true;
         }
     }
